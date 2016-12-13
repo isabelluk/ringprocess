@@ -12,10 +12,15 @@ create_node(N,R) ->
 create_node(1,NextPid,R) ->
 	NextPid ! token,
     register(head, self()),
+    statistics(wall_clock),
     loop(NextPid,R);
 create_node(N,NextPid,R) ->
     PrevPid = spawn_link(process, loop, [NextPid,R]),
     create_node(N - 1, PrevPid,R).
+
+timer() ->
+    {_, Time} = statistics(wall_clock),
+    io:fwrite("Total time is ~w ms~n",[Time]).
 
 loop(NextPid,R) ->
     case R of
@@ -30,7 +35,7 @@ loop(NextPid,R) ->
             NextPid ! stop,
             receive
                 stop ->
-                    NextPid ! stop,
-                    ok
+                    NextPid ! stop
             end
-    end.
+    end,
+    timer().
