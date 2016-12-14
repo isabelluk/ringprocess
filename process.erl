@@ -23,19 +23,18 @@ timer() ->
     io:fwrite("Total time is ~w ms~n",[Time]).
 
 loop(NextPid,R) ->
-    case R of
-        R when R > 0 ->
-            NextPid ! token,
-            receive
-                token ->
+    receive
+        token ->
+        case R of
+            R when R > 0 ->
+                   NextPid ! token,
         	       io:fwrite("(~w) passing it to ~p~n",[R,NextPid]),
-                   loop(NextPid,R-1)
-            end;
-        0 ->
-            NextPid ! stop,
-            receive
-                stop ->
-                    NextPid ! stop
-            end
-    end,
-    timer().
+                   loop(NextPid,R-1);            
+            0 ->
+                timer(),
+                NextPid ! stop,
+                loop(NextPid,R-1)
+            end;        
+        stop ->
+            NextPid ! stop          
+    end.
